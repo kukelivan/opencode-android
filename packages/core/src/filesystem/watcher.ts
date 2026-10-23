@@ -238,6 +238,24 @@ function subscribeDirectory(
   ignore: readonly string[],
   publish: (update: Update) => void,
 ): Effect.Effect<Subscription | undefined> {
+  // Bun supports recursive fs.watch on Android, where Parcel has no binding.
+  if (process.platform === "android") {
+    return Effect.try(() => {
+      const ignored = ignore.map((entry) => ({ path: path.resolve(directory, entry), glob: new Bun.Glob(entry) }))
+      const subscription = watch(directory, { recursive: true }, (_event, file) => {
+        if (!file) return
+        const target = path.resolve(directory, file)
+        if (ignored.some((entry) => FSUtil.contains(entry.path, target) || entry.glob.match(file))) return
+        publish({ path: target, type: "update" })
+      })
+      subscription.on("error", (error: unknown) =>
+        Effect.runFork(Effect.logError("watcher callback failed", { path: directory, error })),
+      )
+      return { unsubscribe: () => Promise.resolve(subscription.close()), backend: "node-recursive" }
+    }).pipe(
+      Effect.catch((error) => Effect.logError("failed to subscribe", { directory, error }).pipe(Effect.as(undefined))),
+    )
+  }
   if (!native || !backend) {
     return Effect.logError("watcher backend not supported", { directory, platform: process.platform }).pipe(
       Effect.as(undefined),

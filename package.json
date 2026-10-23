@@ -24,13 +24,11 @@
     "lint:effect-simplifications": "ast-grep scan -c script/ast-grep/effect-simplifications/sgconfig.yml --off=unused-suppression packages",
     "test:lint-rules": "ast-grep test -c script/ast-grep/sgconfig.yml",
     "test:effect-simplification-rules": "ast-grep test -c script/ast-grep/effect-simplifications/sgconfig.yml",
-    "typecheck": "bun turbo typecheck --concurrency=3",
+    "typecheck": "bun termux/typecheck.ts",
     "check": "bun run lint && bun run typecheck",
     "typecheck:profile": "bun script/profile-typecheck.ts",
     "typecheck:profile:packages": "bun script/profile-typecheck-packages.ts",
     "upgrade-opentui": "bun run script/upgrade-opentui.ts",
-    "postinstall": "bun run --cwd packages/core fix-node-pty",
-    "prepare": "husky",
     "random": "echo 'Random script'",
     "sso": "aws sso login --sso-session=opencode --no-browser",
     "test": "echo 'do not run tests from root' && exit 1"
@@ -54,9 +52,9 @@
       "@octokit/rest": "22.0.0",
       "@hono/standard-validator": "0.2.0",
       "@hono/zod-validator": "0.4.2",
-      "@opentui/core": "0.6.6",
-      "@opentui/keymap": "0.6.6",
-      "@opentui/solid": "0.6.6",
+      "@opentui/core": "npm:@androidtui/core@0.6.6",
+      "@opentui/keymap": "npm:@androidtui/keymap@0.6.6",
+      "@opentui/solid": "npm:@androidtui/solid@0.6.6",
       "@tanstack/solid-virtual": "3.13.37",
       "@standard-schema/spec": "1.1.0",
       "ulid": "3.0.1",
@@ -118,6 +116,7 @@
     "@actions/artifact": "5.0.1",
     "@ast-grep/cli": "0.44.0",
     "@opencode/client": "workspace:*",
+    "@opentui/keymap": "catalog:",
     "@oxlint/plugins": "1.60.0",
     "@tsconfig/bun": "catalog:",
     "@types/bun": "catalog:",
@@ -150,13 +149,12 @@
     "semi": false,
     "printWidth": 120
   },
-  "trustedDependencies": [
-    "esbuild",
-    "node-pty",
-    "protobufjs",
-    "electron"
-  ],
+  "trustedDependencies": [],
+  "optionalDependencies": {
+    "@opentui/core-android-arm64": "npm:@androidtui/core-android-arm64@0.6.6"
+  },
   "overrides": {
+    "@opentui/core-android-arm64": "npm:@androidtui/core-android-arm64@0.6.6",
     "@opentui/core": "catalog:",
     "@opentui/keymap": "catalog:",
     "@opentui/solid": "catalog:",
@@ -181,7 +179,6 @@
     "@ai-sdk/google@3.0.73": "patches/@ai-sdk%2Fgoogle@3.0.73.patch",
     "@pierre/trees@1.0.0-beta.4": "patches/@pierre%2Ftrees@1.0.0-beta.4.patch",
     "@tanstack/virtual-core@3.17.8": "patches/@tanstack%2Fvirtual-core@3.17.8.patch",
-    "@ff-labs/fff-bun@0.10.5": "patches/@ff-labs%2Ffff-bun@0.10.5.patch",
     "ghostty-web@github:anomalyco/ghostty-web#83c0a07": "patches/ghostty-web@0.3.0.patch",
     "vite@8.2.2": "patches/vite@8.2.2.patch",
     "@modelcontextprotocol/client@2.0.0": "patches/@modelcontextprotocol%2Fclient@2.0.0.patch",

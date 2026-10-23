@@ -1,4 +1,3 @@
-import cloudflare from "@astrojs/cloudflare"
 import mdx from "@astrojs/mdx"
 import { unified } from "@astrojs/markdown-remark"
 import { defineConfig } from "astro/config"
@@ -11,7 +10,7 @@ export default defineConfig({
   site: process.env.CLOUDFLARE_ENV === "production" ? "https://opencode.ai" : "https://dev.opencode.ai",
   base,
   output: "server",
-  adapter: cloudflare({ imageService: "passthrough" }),
+  adapter: await deploymentAdapter(),
   integrations: [mdx()],
   markdown: {
     processor: unified({ remarkPlugins: [[remarkDocsLinks, { base }]], rehypePlugins: [rehypeTableScroll] }),
@@ -55,3 +54,10 @@ export default defineConfig({
     },
   },
 })
+
+async function deploymentAdapter() {
+  // Avoid loading the deployment runtime during Android-only source checks.
+  if (process.platform === "android" && process.argv.includes("check")) return
+  const cloudflare = await import("@astrojs/cloudflare")
+  return cloudflare.default({ imageService: "passthrough" })
+}

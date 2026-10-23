@@ -30,6 +30,10 @@ const baselineFlag = process.argv.includes("--baseline")
 const requestedTarget = process.argv.find((arg) => arg.startsWith("--target="))?.slice("--target=".length)
 const skipInstall = process.argv.includes("--skip-install")
 const skipWebUi = process.argv.includes("--skip-web-ui")
+const isTermux = process.platform === "android"
+if (isTermux && requestedTarget !== "opencode-linux-arm64") {
+  throw new Error("Termux builds require --target=opencode-linux-arm64")
+}
 const solidPlugin = createSolidTransformPlugin()
 const highlights = Script.preview ? undefined : embed(process.env.OPENCODE_RELEASE_NOTES)
 const releaseAssets = new Map<string, Promise<Map<string, string>>>()
@@ -144,7 +148,10 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     name: "parcel-watcher-binding",
     setup(build) {
       build.onLoad({ filter: /filesystem[/\\]watcher-binding\.ts$/ }, () => ({
-        contents: `export default () => require(${JSON.stringify(parcelWatcherPackage)})`,
+        // There is no Bionic binding; watcher.ts handles this by polling.
+        contents: isTermux
+          ? `export default () => { throw new Error("@parcel/watcher has no Android binding") }`
+          : `export default () => require(${JSON.stringify(parcelWatcherPackage)})`,
         loader: "js",
       }))
     },
@@ -167,9 +174,9 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     external: ["node-gyp"],
     format: "esm",
     minify: true,
-    bytecode: true,
+    bytecode: !isTermux,
     sourcemap: Script.channel === "dev" || Script.channel === "local" ? "inline" : "none",
-    splitting: true,
+    splitting: !isTermux,
     compile: {
       autoloadBunfig: false,
       autoloadDotenv: false,

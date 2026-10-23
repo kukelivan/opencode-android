@@ -1,0 +1,22 @@
+diff --git a/internal/fswatch/fanotify_linux.go b/internal/fswatch/fanotify_linux.go
+--- a/internal/fswatch/fanotify_linux.go
++++ b/internal/fswatch/fanotify_linux.go
+@@ -6,6 +6,7 @@ import (
+ 	"encoding/binary"
+ 	"errors"
+ 	"fmt"
++	"runtime"
+ 	"sync/atomic"
+ 	"unsafe"
+ 
+@@ -187,6 +188,10 @@ func init() {
+ // fanotifyAvailable probes whether fanotify_init succeeds with the flags
+ // this backend needs.
+ func fanotifyAvailable() bool {
++	// Android seccomp traps fanotify_init with SIGSYS rather than returning EPERM.
++	if runtime.GOOS == "android" {
++		return false
++	}
+ 	fd, err := unix.FanotifyInit(fanotifyInitFlags, unix.O_RDONLY|unix.O_CLOEXEC)
+ 	if err != nil {
+ 		return false
