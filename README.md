@@ -80,9 +80,9 @@ code splitting, встроенного веб-интерфейса и непод
 pkg install curl
 mkdir -p "$HOME/Downloads/opencode-android-2.1.2-1"
 cd "$HOME/Downloads/opencode-android-2.1.2-1"
-curl -fLO https://github.com/kukelivan/opencode-android/releases/download/v2.1.2-android.1/opencode-android_2.1.2~android.1_aarch64.deb
+curl -fLO https://github.com/kukelivan/opencode-android/releases/download/v2.1.2-android.1/opencode-android_2.1.2.android.1_aarch64.deb
 curl -fLO https://github.com/kukelivan/opencode-android/releases/download/v2.1.2-android.1/SHA256SUMS
-sha256sum --check --ignore-missing SHA256SUMS && apt install ./opencode-android_2.1.2~android.1_aarch64.deb
+sha256sum --check --ignore-missing SHA256SUMS && apt install ./opencode-android_2.1.2.android.1_aarch64.deb
 opencode --version
 opencode --standalone
 ```

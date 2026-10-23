@@ -41,5 +41,7 @@ Description: Experimental OpenCode Android/Termux build
  Uses the Bun, OpenTUI and PTY components from bd-loser's ecosystem.
 EOF
 mkdir -p "$SOURCE/dist/release"
+# GitHub заменяет ~ в именах приложений к релизу на точку.
+FILENAME_VERSION="${VERSION//\~/.}"
 dpkg-deb -Zxz -z3 --threads-max=2 --root-owner-group --build "$STAGE" \
-  "$SOURCE/dist/release/opencode-android_${VERSION}_aarch64.deb"
+  "$SOURCE/dist/release/opencode-android_${FILENAME_VERSION}_aarch64.deb"
