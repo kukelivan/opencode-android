@@ -1,125 +1,171 @@
-<p align="center">
-  <a href="https://opencode.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
-  </a>
-</p>
-<p align="center">The open source AI coding agent.</p>
-<p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/@opencode/cli"><img alt="npm" src="https://img.shields.io/npm/v/@opencode/cli?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
-</p>
+# opencode для Android (Termux)
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
-</p>
+Нативная сборка [opencode](https://opencode.ai) под Android **aarch64 / Bionic**,
+работающая в Termux. Без proot, chroot, root и glibc.
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+Эта ветка — исходники, из которых получается такая сборка. Это не руководство
+по самому opencode: **если вы ещё не пользуетесь opencode, начните с
+[оригинального README](https://github.com/anomalyco/opencode#readme)**, а сюда
+возвращайтесь за android-спецификой.
 
----
+- Оригинальный проект: [`anomalyco/opencode`](https://github.com/anomalyco/opencode)
+- Готовые бинарники на том же стеке: [`bd-loser/opencode-bionic`](https://github.com/bd-loser/opencode-bionic)
+- Патченный рантайм Bun: [`bd-loser/bun-termux`](https://github.com/bd-loser/bun-termux)
 
-### Installation
+## Ветки
+
+| Ветка | Содержимое |
+| --- | --- |
+| `android` (по умолчанию) | Этот порт. Android-патчи + сборка в `termux/`. |
+| `dev` | Чистое зеркало upstream `dev`, база для ребейза. |
+
+## Требования
+
+- Android на **aarch64** (ARM64). Termux из [F-Droid](https://f-droid.org/packages/com.termux/)
+  или [GitHub releases](https://github.com/termux/termux-app/releases) — версия из
+  Play Store заброшена и не подойдёт.
+- [Патченный Bun **1.4.3**](https://github.com/bd-loser/bun-termux). Стоковый Bun
+  не содержит нужных исправлений, и `termux/build.sh` на другой версии просто
+  откажется работать.
+- Для сборки: `git`, `curl`, `tar`, `file`, `python`, `ripgrep`.
+- Для инструментов разработки: `nodejs-lts`, `rust`, `golang`, `clang`.
+
+## Установка
+
+### Готовый бинарник
+
+Если нужен просто работающий `opencode`, не собирайте его сами:
 
 ```bash
-# YOLO
-curl -fsSL https://opencode.ai/v2/install | bash
-
-# Package managers
-npm i -g @opencode/cli@latest      # or bun/pnpm/yarn
-brew install anomalyco/tap/opencode-v2 # macOS and Linux (recommended, always up to date)
-brew install opencode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-beta              # Arch Linux (Latest from AUR)
-mise use -g opencode               # Any OS
-nix run github:anomalyco/opencode  # Nix
+curl -fsSL https://raw.githubusercontent.com/bd-loser/opencode-bionic/main/repo-setup.sh | bash
 ```
 
-> [!TIP]
-> Remove versions older than 0.1.x before installing.
-
-### Desktop App (BETA)
-
-OpenCode is also available as a desktop application. Download it from [opencode.ai/download](https://opencode.ai/download).
-
-| Platform              | Download                           |
-| --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-win-x64.exe`     |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
+### Из исходников
 
 ```bash
-# macOS (Homebrew)
-brew install --cask opencode-desktop
+pkg update
+pkg install git curl tar file python ripgrep
+
+# Патченный Bun, ставится в $PREFIX/bin
+curl -fsSL https://raw.githubusercontent.com/bd-loser/bun-termux/main/scripts/install.sh | bash
+bun --version   # должно быть 1.4.3
+
+git clone -b android https://github.com/kukelivan/opencode-android.git
+cd opencode-android
+
+# Сборка: дерево копируется в $TMPDIR, ставятся зависимости, встраиваются
+# android-бинарники PTY, на выходе dist/opencode-android-arm64
+bash termux/build.sh
+
+# Установка в $PREFIX/bin (старый бинарник бэкапится, проверяется наличие rg)
+bash termux/install.sh
+opencode --version
 ```
 
-#### Installation Directory
+Исходники могут лежать на общей памяти, а вот **сборка — нет**: она
+автоматически переносится во внутреннюю память Termux, потому что
+`/storage/emulated/0` не поддерживает симлинки в `node_modules` и бит
+исполнения. `build.sh` записывает итоговый `bun.lock` обратно в исходники.
 
-The install script respects the following priority order for the installation path:
-
-1. `$OPENCODE_INSTALL_DIR` - Custom installation directory
-2. `$XDG_BIN_DIR` - XDG Base Directory Specification compliant path
-3. `$HOME/bin` - Standard user binary directory (if it exists or can be created)
-4. `$HOME/.opencode/bin` - Default fallback
+### Запуск
 
 ```bash
-# Examples
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/v2/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/v2/install | bash
+opencode               # фоновый сервер под управлением upstream
+opencode --standalone  # собственный сервер в этом же процессе
 ```
 
-### Agents
+На Android лучше `--standalone`: система может в любой момент убить фоновый
+сервер. После установки новой сборки перезапустите opencode.
 
-OpenCode includes two built-in agents you can switch between with the `Tab` key.
+## Что изменено под Android
 
-- **build** - Default, full-access agent for development work
-- **plan** - Read-only agent for analysis and code exploration
-  - Denies file edits by default
-  - Asks permission before running bash commands
-  - Ideal for exploring unfamiliar codebases or planning changes
+| Путь | Изменение |
+| --- | --- |
+| `packages/cli/script/build.ts` | На Android требует `--target=opencode-linux-arm64`, отключает bytecode и code splitting, подменяет биндинг Parcel watcher, которого нет под Bionic. |
+| `packages/core/src/filesystem/watcher.ts` | На Android используется рекурсивный `fs.watch` из Bun с прежней фильтрацией игнорируемых путей. |
+| `package.json` | OpenTUI заменён на сборки `@androidtui/*` плюс `@opentui/core-android-arm64`; `typecheck` работает без Turborepo; хуки `postinstall`/`prepare` убраны; списка trusted dependencies нет. |
+| `bun.lock` | Лок-файл под всё перечисленное. |
+| `packages/posts/astro.config.ts`, `services/www/astro.config.ts` | Адаптер Cloudflare подгружается лениво, чтобы `astro check` не тянул `workerd`. |
+| `termux/` | `build.sh`, `install.sh`, `check.sh`, `setup-tools.sh` и адаптеры нативных инструментов. Подробности — в [`termux/README.md`](termux/README.md). |
 
-Also included is a **general** subagent for complex searches and multistep tasks.
-This is used internally and can be invoked using `@general` in messages.
+## Ограничения
 
-Learn more about [agents](https://opencode.ai/docs/agents).
+- **Только ARM64 и только Termux.** Ни x86_64, ни эмуляторов, ни других
+  android-оболочек.
+- **Бинарник обязан лежать во внутренней памяти.** Android не даёт выполнять
+  файлы из `/storage/emulated/0` и `/sdcard`; `termux/install.sh` ставит
+  `$PREFIX/bin/opencode`.
+- **Нет веб-интерфейса.** Сборка идёт с `--skip-web-ui`: только TUI, CLI и
+  HTTP API-сервер, без встроенных веб-ассетов.
+- **Нет Parcel watcher.** Под Bionic для него нет биндинга, поэтому рекурсивное
+  отслеживание работает на `fs.watch` из Bun с теми же правилами игнорирования.
+  Поведение близкое, но не идентичное inotify/FSEvents из upstream.
+- **Нет bytecode и code splitting** в android-бинарнике — ограничения
+  `bun --compile` на этой платформе.
+- **Нет Turborepo.** Android-бинарника для него не существует, поэтому
+  `bun run typecheck` последовательно запускает `typecheck` каждого воркспейса.
+  Результат корректный, но медленнее — зато предсказуемо по памяти.
+- **Нет `workerd`.** У Cloudflare нет android-сборки: `astro check` работает, а
+  сборку сайтов для деплоя нужно запускать в окружении с поддержкой Cloudflare.
+- **Нативные инструменты собираются из исходников.** `ast-grep` 0.44.0 и
+  нативный компилятор TypeScript 7.0.2 компилируются под Bionic в
+  `$HOME/.local/share/opencode-termux-tools`; в TypeScript внесён патч, потому
+  что Android убивает процесс на `fanotify_init`.
+- **Поиску нужен ripgrep из Termux** (`pkg install ripgrep`) вместо встроенного
+  glibc-бинарника.
+- **Хуки `postinstall` / `prepare` отключены**: `fix-node-pty` рассчитан только
+  на Linux, а husky требует рабочих git-хуков.
+- **Порт отстаёт от upstream.** Ветка закреплена на OpenTUI 0.6.6, потому что
+  это последние опубликованные сборки `@androidtui`; более свежие коммиты
+  upstream `dev` требуют нового OpenTUI и не вливаются, пока android-сборок нет.
+- **Обновление пакетов может затереть бинарник.** `pkg upgrade` способен
+  перезаписать `$PREFIX/bin/opencode`; сохраняйте бэкап с меткой времени,
+  который печатает `install.sh`.
 
-### Documentation
+## Разработка
 
-For more info on how to configure OpenCode, [**head over to our docs**](https://opencode.ai/docs).
+`termux/check.sh` готовит внутреннюю рабочую копию, собирает нативные
+инструменты и прогоняет полный набор проверок:
 
-### Contributing
+```bash
+pkg install nodejs-lts rust golang clang
+bash termux/check.sh
 
-If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
+# внутри напечатанной рабочей копии:
+bun run test:lint-rules
+bun run test:effect-simplification-rules
+```
 
-### Building on OpenCode
+Полный `bun run check` (lint, typecheck, оба сайта на Astro) на устройстве
+проходит; он показывает предупреждения линтера из upstream, которые порт не
+подавляет. После очередного `bun install` повторите `bun termux/link-tools.ts`,
+чтобы восстановить ссылки на android-инструменты.
 
-If you are working on a project that's related to OpenCode and is using "opencode" as part of its name, for example "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OpenCode team and is not affiliated with us in any way.
+## Обновление из upstream
 
----
+```bash
+git fetch origin dev
+git rebase origin/dev
+```
 
-**Join our community** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+Пока порт закреплён на более старом OpenTUI, конфликты в `package.json` и
+`bun.lock` ожидаемы — разрешайте их в пользу пинов `@androidtui`.
+
+## Закреплённые версии
+
+| Компонент | Версия |
+| --- | --- |
+| База upstream | `c93aaae371` (2.1.2, `dev`) |
+| Bun | 1.4.3 patched (`bd-loser/bun-termux`) |
+| OpenTUI | `@androidtui/*` 0.6.6 |
+| `bun-pty` | 0.4.11 |
+| `opencode-pty` | 0.2.0 |
+| `ast-grep` | 0.44.0 |
+| Нативный TypeScript | 7.0.2 |
+
+## Лицензия
+
+MIT, см. [LICENSE](LICENSE). Копирайт upstream сохранён без изменений.
+
+Это неофициальный порт, не связанный с мейнтейнерами opencode и не
+поддерживаемый ими.
